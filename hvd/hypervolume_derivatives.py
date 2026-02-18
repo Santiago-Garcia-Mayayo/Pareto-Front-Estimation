@@ -201,78 +201,72 @@ class HypervolumeDerivatives:
     def _compute_hessian(
         self, X: np.ndarray, Y: np.ndarray = None, YdX: np.ndarray = None
     ) -> Dict[str, np.ndarray]:
-        """compute the hypervolume gradient and Hessian matrix using analytical expressions
-
-        Parameters
-        ----------
-        X : Union[np.ndarray, List[List]]
-            the decision points at which the derivatives are computed
-            It should have a shape of (N, n_decision_var)
-
-        Returns
-        -------
-        Dict[str, np.ndarray]
-            {
-                "HVdX": gradient of the hypervolume indicator w.r.t. the decision variable
-                    of shape (`N` * `n_decision_var`, ),
-                "HVdY": gradient of the hypervolume indicator w.r.t. the objective variable
-                    of shape (`N` * `n_objective`, ),
-                "HVdX2": Hessian of the hypervolume indicator w.r.t. the decision variable
-                    of shape (`N` * `n_decision_var`, `N` * `n_decision_var`),
-                "HVdY2": Hessian of the hypervolume indicator w.r.t. the objective variable
-                    of shape (`N` * `n_objective`, `N` * `n_objective`)
-            }
+        """compute the hypervolume hessian using the quasi newton BFGS formula
         """
+
         X = self._check_X(X)
         # TODO: fix passing the input arugment `YdX`
         res = self._compute_gradient(X, Y, YdX)
-        Y, YdX, YdX2 = self._compute_objective_derivatives(X, Y, YdX, compute_hessian=True)
+        Y, YdX, _ = self._compute_objective_derivatives(X, Y, YdX, compute_hessian=True)
         HVdY, HVdX = res["HVdY"], res["HVdX"]
-        HVdY2 = np.zeros((self.N * self.n_obj, self.N * self.n_obj))
-        for i in range(self.N):
-            if i in self._dominated_indices:  # if the point is dominated
-                continue
-            for k in range(self.n_obj):
-                # project along `axis`; `*_` indicates variables in the projected subspace
-                y_, pareto_front_, ref_, proj_idx = self._project(axis=k, i=i)
-                # partial derivatives ∂(∂HV/∂y_k^i)/∂y^i
-                # of shape (1, dim), where the k-th element is zero
-                Y_ = np.vstack([y_, pareto_front_])
-                pareto_indices = (
-                    np.array([np.argmin(Y_.ravel())])
-                    if Y_.shape[1] == 1
-                    else non_domin_sort(Y_, only_front_indices=True)[0]
-                )
-                # pareto_indices = get_non_dominated(Y_, return_index=True)
-                idx = np.where(pareto_indices == 0)[0]
-                out = self.hypervolume_dY(Y_[pareto_indices], ref_)[idx]
+        if hasattr(self, "pHVdY"):  # DFP
+            Sk = Y - self.pY
+            Yk = HVdY - self.pHVdY
+            Sk = Sk.reshape(-1, 1)
+            Yk = Yk.reshape(-1, 1)
+            Ak = self.pHVdY2
 
-                rows = slice(i * self.n_obj, (i + 1) * self.n_obj)
-                HVdY2[rows, i * self.n_obj + k] = np.insert(-1.0 * out, k, 0)
-                # partial derivatives ∂(∂HV/∂y_k^i)/∂y^{-i}
-                # of shape (len(proj_idx), dim), where the k-th element is zero
-                # ∂HV/∂y_k^i is the hypervolume improvement of `x_` w.r.t. `pareto_front_`
-                out = self.hypervolume_dY(np.clip(pareto_front_, y_, ref_), ref=ref_)
-                # get the dimension of points in `pareto_front_` that are not dominated by `x_`
-                idx = pareto_front_ < y_
-                out[idx] = 0
-                # hypervolume improvement of points in `pareto_front_` decreases ∂HV/∂y_k^i
-                out = np.insert(out, k, 0, axis=1)
-                for s, j in enumerate(proj_idx):
-                    rows = slice(j * self.n_obj, (j + 1) * self.n_obj)
-                    HVdY2[rows, i * self.n_obj + k] = out[s]
+            sTy = Sk.T @ Yk  # s_k^T * y_k
+            sTAs = Sk.T @ Ak @ Sk  # s_k^T * A_{k-1} * s_k
 
+            if np.abs(sTy) < 1e-12:
+                HVdY2 = Ak
+            else:
+                # (y_k * y_k^T) / (s_k^T * y_k)
+                Term1 = (Yk @ Yk.T) / sTy
+
+                ASk = Ak @ Sk
+                ASSAT = ASk @ Sk.T @ Ak.T
+
+                if np.abs(sTAs) < 1e-12:
+                    Term2 = 0.0
+                else:
+                    Term2 = ASSAT / sTAs
+                TermA = Yk @ Sk.T @ Ak
+                TermB = Ak @ Sk @ Yk.T
+                TermC_Num = Yk @ Sk.T @ ASk @ Yk.T
+                TermD = (Yk @ Yk.T) / sTy
+                sTy_sq = sTy**2
+                HVdY2 = (
+                        Ak
+                        - (TermA / sTy)
+                        - (TermB / sTy)
+                        + (TermC_Num / sTy_sq)
+                        + TermD
+                    )
+
+        
+        else:
+            HVdY2 = np.eye(self.N * self.n_obj)
         # TODO: use sparse matrix multiplication here
-        HVdX2 = YdX.T @ HVdY2 @ YdX + np.einsum("...i,i...", HVdY, YdX2)
+
+        HVdX2 = YdX.T @ HVdY2 @ YdX
+
         HVdX2 = (HVdX2 + HVdX2.T) / 2
+        self.pY = Y
+        self.pHVdY = HVdY
+        self.pHVdY2 = HVdY2
         return dict(
-            Y=self.objective_points if self.minimization else -1 * self.objective_points,
+            Y=(
+                self.objective_points
+                if self.minimization
+                else -1 * self.objective_points
+            ),
             HVdX=HVdX,
             HVdY=HVdY if self.minimization else -1 * HVdY,
             HVdX2=HVdX2,
             HVdY2=HVdY2,
         )
-
     def _project(
         self, axis: int, i: int, pareto_front: np.ndarray = None, ref: np.ndarray = None
     ) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
