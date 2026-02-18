@@ -1,3 +1,18 @@
+**Author:** Santiago García Mayayo 
+**Institution:** Leiden University
+
+> **⚠️ Fork & Thesis Note:** > This repository is a fork of the original `HypervolumeDerivatives` project. While the original framework focuses on the exact Hypervolume Newton Method using analytical Hessian computation, my Master's thesis expands this architecture by implementing and evaluating **Quasi-Newton Optimization Strategies** for efficient Pareto Front estimation.
+
+### 📍 Where to find my contributions
+To ensure a clean separation between the original upstream code and my research, all my original contributions, algorithms, and test suites are strictly isolated in the following directory:
+* 📁 **`quasi_newton_estimator/`** *(or whatever name you give your folder)*
+
+For the defense and code review, please refer primarily to the contents of that directory. The rest of this repository retains the original architecture to preserve dependencies and mathematical foundations.
+
+---
+
+*Below is the documentation for the original underlying framework:*
+
 # Hypervolume Indicator Derivatives
 
 * **What for?**
