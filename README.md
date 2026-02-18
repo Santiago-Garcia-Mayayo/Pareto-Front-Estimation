@@ -1,7 +1,7 @@
 **Author:** Santiago García Mayayo 
 **Institution:** Leiden University
 
-**Fork & Thesis Note:** This repository is a fork of the original `HypervolumeDerivatives` project of Dr. Hao Wang. While the original project focuses on the exact Hypervolume Newton Method using the analytical Hessian computation, my Master's thesis expands this idea in two ways. First, it implements and evaluates Quasi-Newton Optimization Strategies for efficient Pareto Front estimation. Second, it introduces a novel iterative approach to approximate the Pareto Front by building a model from the non-dominated points. The search is then directed along the most promising directions using a method to identify the candidate point on the predicted front that maximizes the hypervolume contribution.
+**Fork & Thesis Note:** This repository is a fork of the original `HypervolumeDerivatives` project of **Dr. Hao Wang**. While the original project focuses on the exact Hypervolume Newton Method using the analytical Hessian computation, my Master's thesis expands this idea in two ways. First, it implements and evaluates Quasi-Newton Optimization Strategies for efficient Pareto Front estimation. Second, it introduces a novel iterative approach to approximate the Pareto Front by building a model from the non-dominated points. The search is then directed along the most promising directions using a method to identify the candidate point on the predicted front that maximizes the hypervolume contribution.
 
 ### Where to find my contributions
 All my original contributions, algorithms, and test suites are strictly isolated in the following directory:
@@ -10,6 +10,7 @@ Exceptionally, a specific modification was made to the original core framework t
 * File: `hypervolume_derivatives.py` 
 * Function: `_compute_hessian`
 * Change: Modified because it computes the analytical hessian. Now it is an approximation of the Hessian using a Quasi Newton formula.
+  
 The remainder of the repository keeps **Dr. Wang's original architecture unmodified**, preserving the underlying dependencies and mathematical foundations of the project.
 
 ---
