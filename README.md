@@ -1,13 +1,16 @@
 **Author:** Santiago García Mayayo 
 **Institution:** Leiden University
 
-**Fork & Thesis Note:** This repository is a fork of the original `HypervolumeDerivatives` project. While the original framework focuses on the exact Hypervolume Newton Method using analytical Hessian computation, my Master's thesis expands this architecture by implementing and evaluating Quasi-Newton Optimization Strategies for efficient Pareto Front estimation.
+**Fork & Thesis Note:** This repository is a fork of the original `HypervolumeDerivatives` project of Dr. Hao Wang. While the original project focuses on the exact Hypervolume Newton Method using the analytical Hessian computation, my Master's thesis expands this idea in two ways. First, it implements and evaluates Quasi-Newton Optimization Strategies for efficient Pareto Front estimation. Second, it introduces a novel iterative approach to approximate the Pareto Front by building a model from the non-dominated points. The search is then directed along the most promising directions using a method to identify the candidate point on the predicted front that maximizes the hypervolume contribution.
 
 ### Where to find my contributions
-To ensure a clean separation between the original upstream code and my research, all my original contributions, algorithms, and test suites are strictly isolated in the following directory:
-* **`quasi_newton_estimator/`** 
-
-For the defense and code review, please refer primarily to the contents of that directory. The rest of this repository retains the original architecture to preserve dependencies and mathematical foundations.
+All my original contributions, algorithms, and test suites are strictly isolated in the following directory:
+* **`quasi_newton_estimator/`**
+Exceptionally, a specific modification was made to the original core framework to enable my implementation:
+* File: `hypervolume_derivatives.py` 
+* Function: `_compute_hessian`
+* Change: Modified because it computes the analytical hessian. Now it is an approximation of the Hessian using a Quasi Newton formula.
+The remainder of the repository keeps **Dr. Wang's original architecture unmodified**, preserving the underlying dependencies and mathematical foundations of the project.
 
 ---
 
