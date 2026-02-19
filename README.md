@@ -1,4 +1,7 @@
 **Author:** Santiago García Mayayo 
+
+**Supervisors:** Dr. Hao Wang and Dr. Elena Raponi
+
 **Institution:** Leiden University
 
 **Fork & Thesis Note:** This repository is a fork of the original `HypervolumeDerivatives` project of **Dr. Hao Wang**. While the original project focuses on the exact Hypervolume Newton Method using the analytical Hessian computation, my Master's thesis expands this idea in two ways. First, it implements and evaluates Quasi-Newton Optimization Strategies for efficient Pareto Front estimation. Second, it introduces a novel iterative approach to approximate the Pareto Front by building a model from the non-dominated points. The search is then directed along the most promising directions using a method to identify the candidate point on the predicted front that maximizes the hypervolume contribution.
