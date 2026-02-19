@@ -4,28 +4,25 @@ This directory contains the original source code, test suites, and iterative app
 
 **Work in Progress...**
 
+## Organisation
 The module is organized as follows:
 
 * **/src** - Contains the core implementation in the file optimizer.py, including the `MultiObjectiveOptimizer` class, the RBF surrogate model, and a pruning strategy.
-* **/tests** - Contains the verification suites to ensure the mathematical and algorithmic correctness of the estimators.
+* **/tests** - Contains the executable benchmark test files to test the algorithm.
 
-**1. Running the Optimizer:**
-The core logic relies heavily on vectorized `NumPy` operations and `SciPy` optimization routines (`differential_evolution`, `minimize` with SLSQP). To initialize and run the estimator:
-```python
-from src.optimizer import MultiObjectiveOptimizer
-
-# Initialize with your objective functions and bounds
-optimizer = MultiObjectiveOptimizer(objectives=[f1, f2], bounds=[(0, 1), (0, 1)])
-pareto_x, pareto_y = optimizer.fit()
-
-
-**2. Running the Tests (Software Verification):**
-
-Rigorous verification and validation are critical for the reliability of the Quasi-Newton optimizer and the surrogate models. The test suite is specifically designed to ensure mathematical correctness, validate edge cases in the objective space, and prevent regressions when integrating with the upstream exact Hypervolume framework.
-
-To execute the automated test suite, ensure you have `pytest` installed. Run the following command from the root of this module (the `quasi_newton_estimator/` directory):
-
+## Running the Optimizer:
+First, to pip install the requirements of the global project, or just execute:
 ```bash
-> pytest tests/ -v
+> pip install numpy scipy matplotlib
+```
+The best way to evaluate this module is by running one of the provided experiment examples. These scripts will execute the iterative optimization loop and launch a live interactive plot showing the algorithm approximating the Pareto Front step-by-step. You need to execute:
+```bash
+> python test_to_run.py
+```
 
-> pytest tests/ --cov=src/
+## Future work
+As this module is actively being developed for my Master's Thesis, the following objectives are planned:
+
+* **Quasi-Newton Integration:** The directional search along the approximated Pareto Front will be fully powered by the custom Quasi-Newton algorithm developed in the broader scope of this thesis.
+* **Advanced Front Management:** Further enhancements regarding the treatment of the Pareto Front, including clustering techniques, sparsity control, and rigorous convergence criteria.
+* **Extensive Benchmarking:** Comprehensive performance evaluations against other state-of-the-art multi-objective optimization algorithms to rigorously validate the estimator's efficiency.
