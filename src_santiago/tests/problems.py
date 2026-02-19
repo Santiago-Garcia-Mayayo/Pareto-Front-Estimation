@@ -1,23 +1,15 @@
 import numpy as np
 
 
-# --- ZDT1 (2 Objectives - Convex) ---
+# ZDT1
 def zdt1(x):
-    """
-    ZDT1: Problema clásico de 2 objetivos.
-    El frente de Pareto es una curva convexa suave.
-    Ecuación del frente óptimo: f2 = 1 - sqrt(f1)
-    """
     x = np.array(x)
     n = len(x)
 
-    # f1 depende solo de la primera variable
     f1 = x[0]
 
-    # g(x) depende de todas las demás variables
     g = 1.0 + (9.0 / (n - 1)) * np.sum(x[1:])
 
-    # h(f1, g) determina la forma del frente (convexa en este caso)
     h = 1.0 - np.sqrt(f1 / g)
 
     f2 = g * h
@@ -25,7 +17,6 @@ def zdt1(x):
     return [f1, f2]
 
 
-# Wrappers para tu optimizador
 def zdt1_f1(x):
     return zdt1(x)[0]
 
@@ -34,23 +25,14 @@ def zdt1_f2(x):
     return zdt1(x)[1]
 
 
-# --- ZDT2 (2 Objectives - Non-Convex / Concave) ---
+# ZDT2
 def zdt2(x):
-    """
-    ZDT2: Frente de Pareto NO CONVEXO.
-    A diferencia de ZDT1, la curva va "hacia afuera" (cóncava).
-    Ecuación del frente óptimo: f2 = 1 - (f1)^2
-    """
     x = np.array(x)
     n = len(x)
-
-    # f1 es simplemente la primera variable
     f1 = x[0]
 
-    # g(x) es igual que en ZDT1
     g = 1.0 + (9.0 / (n - 1)) * np.sum(x[1:])
 
-    # h(f1, g) es diferente: Usa el CUADRADO en lugar de la raíz
     h = 1.0 - (f1 / g) ** 2
 
     f2 = g * h
@@ -58,7 +40,6 @@ def zdt2(x):
     return [f1, f2]
 
 
-# Wrappers
 def zdt2_f1(x):
     return zdt2(x)[0]
 
@@ -67,20 +48,14 @@ def zdt2_f2(x):
     return zdt2(x)[1]
 
 
-# --- ZDT3 (2 Objectives - Disconnected) ---
+# ZDT3
 def zdt3(x):
-    """
-    ZDT3: Frente de Pareto DESCONECTADO.
-    El término seno crea 5 'islas' separadas de soluciones óptimas.
-    Ecuación: f2 = 1 - sqrt(f1) - f1 * sin(10*pi*f1)
-    """
     x = np.array(x)
     n = len(x)
 
     f1 = x[0]
     g = 1.0 + (9.0 / (n - 1)) * np.sum(x[1:])
 
-    # El término seno es el responsable de la desconexión
     h = 1.0 - np.sqrt(f1 / g) - (f1 / g) * np.sin(10.0 * np.pi * f1)
 
     f2 = g * h
@@ -88,7 +63,6 @@ def zdt3(x):
     return [f1, f2]
 
 
-# Wrappers
 def zdt3_f1(x):
     return zdt3(x)[0]
 
@@ -97,23 +71,16 @@ def zdt3_f2(x):
     return zdt3(x)[1]
 
 
-# --- ZDT4 (2 Objectives - Multimodal / Rastrigin) ---
+# ZDT4
 def zdt4(x):
-    """
-    ZDT4: Frente de Pareto MULTIMODAL.
-    Tiene 21^9 mínimos locales. Es una prueba de fuego para ver
-    si tu algoritmo puede escapar de trampas locales.
-    Ecuación g(x): Rastrigin Function.
-    """
+    
     x = np.array(x)
 
     f1 = x[0]
 
-    # Variables x[1]...x[n]
     xm = x[1:]
     n_m = len(xm)
 
-    # Función Rastrigin para g(x)
     g = 1.0 + 10.0 * n_m + np.sum(xm**2 - 10.0 * np.cos(4.0 * np.pi * xm))
 
     h = 1.0 - np.sqrt(f1 / g)
@@ -123,7 +90,6 @@ def zdt4(x):
     return [f1, f2]
 
 
-# Wrappers
 def zdt4_f1(x):
     return zdt4(x)[0]
 
@@ -132,26 +98,18 @@ def zdt4_f2(x):
     return zdt4(x)[1]
 
 
-# --- ZDT6 (2 Objectives - Non-uniform / Biased Density) ---
+# ZDT6
 def zdt6(x):
-    """
-    ZDT6: Frente de Pareto Cóncavo con densidad fuertemente sesgada.
-    La geometría es f2 = 1 - f1^2 (igual que ZDT2), pero la distribución
-    de las soluciones hace que sea extremadamente difícil poblarlas uniformemente.
-    """
     x = np.array(x)
     n = len(x)
 
     x1 = x[0]
 
-    # f1 es altamente no lineal
     f1 = 1.0 - np.exp(-4.0 * x1) * (np.sin(6.0 * np.pi * x1) ** 6)
 
-    # g(x) usa la raíz cuarta (0.25)
     xm = x[1:]
     g = 1.0 + 9.0 * ((np.sum(xm) / (n - 1)) ** 0.25)
 
-    # h(f1, g) crea la forma cóncava
     h = 1.0 - (f1 / g) ** 2
 
     f2 = g * h
@@ -159,13 +117,13 @@ def zdt6(x):
     return [f1, f2]
 
 
-# Wrappers
 def zdt6_f1(x):
     return zdt6(x)[0]
 
 
 def zdt6_f2(x):
     return zdt6(x)[1]
+
 
 
 # DTLZ1
@@ -422,3 +380,4 @@ def dtlz7_f2(x):
 
 def dtlz7_f3(x):
     return dtlz7(x)[2]
+
