@@ -6,6 +6,7 @@
 ### Where to find my contributions
 All my original contributions, algorithms, and test suites are strictly isolated in the following directory:
 * **`quasi_newton_estimator/`**
+
 Exceptionally, a specific modification was made to the original core framework to enable my implementation:
 * File: `hypervolume_derivatives.py` 
 * Function: `_compute_hessian`
